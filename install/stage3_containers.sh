@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-echo "=== Dunebugger RPi Setup — Stage 3: Docker Remote + NATS ==="
+echo "=== Dunebugger RPi Setup — Stage 3: containers Remote + Scheduler + NATS ==="
 
 if [[ $EUID -eq 0 ]]; then
   echo "ERROR: Run as user pi."
@@ -42,26 +42,19 @@ version: '3.8'
 services:
   dunebugger-remote:
     image: ilciclaio/dunebugger-remote:latest
-    container_name: dunebugger-remote
-    restart: unless-stopped
-    network_mode: host
-    env_file:
-      - .env
-    environment:
-      - PYTHONPATH=/app
-    volumes:
-      - /etc/dunebugger-remote/config:/app/app/config:ro
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
+    ...
     depends_on:
       - nats-server
 
+  dunebugger-scheduler:
+    image: ilciclaio/dunebugger-scheduler:latest
+    ...
+    depends_on:
+      - dunebugger-remote
+
   nats-server:
     image: nats:latest
-    container_name: nats-server
-    restart: unless-stopped
-    network_mode: host
-    command: ["-m", "8222", "-DV"]
+    ...
 EOF
 
   echo "[ACTION REQUIRED]"
@@ -81,7 +74,7 @@ echo "[INFO] Checking service health..."
 docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Image}}"
 
 echo ""
-echo "Check that both containers are running and healthy."
+echo "Check that all containers are running and healthy."
 echo "If OK, proceed to Stage 4:"
 echo "    bash stage4_dunebugger_service.sh"
 echo ""

@@ -11,7 +11,7 @@ GITHUB_REPO_URL="https://raw.githubusercontent.com/ilciclaio/dunebugger-install/
 SCRIPTS=(
   "stage1_base_setup.sh"
   "stage2_dunebugger_setup.sh"
-  "stage3_remote_and_nats.sh"
+  "stage3_containers.sh"
   "stage4_dunebugger_service.sh"
 )
 

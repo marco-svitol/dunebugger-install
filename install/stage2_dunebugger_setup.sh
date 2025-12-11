@@ -14,22 +14,24 @@ fi
 ###############################################
 echo "[INFO] Creating Dunebugger directories..."
 
-sudo mkdir -p /etc/dunebugger/music/easteregg
-sudo mkdir -p /etc/dunebugger/music/onair
-sudo mkdir -p /etc/dunebugger/sequences/onair
-sudo mkdir -p /etc/dunebugger/sfx
-sudo chown -R pi:pi /etc/dunebugger
-
-sudo mkdir -p /etc/dunebugger-remote/config
-sudo chown -R pi:pi /etc/dunebugger-remote
+sudo mkdir -p /opt/dunebugger-data/music/easteregg
+sudo mkdir -p /opt/dunebugger-data/music/onair
+sudo mkdir -p /opt/dunebugger-data/sequences/onair
+sudo mkdir -p /opt/dunebugger-data/sfx
+sudo chown -R pi:pi /opt/dunebugger-data
+sudo mkdir -p /opt/dunebugger-remote/config
+sudo chown -R pi:pi /opt/dunebugger-remote
+sudo mkdir -p /opt/dunebugger-scheduler/config
+sudo chown -R pi:pi /opt/dunebugger-scheduler
 
 echo ""
 echo "=== MANUAL STEP REQUIRED ==="
 echo "Please copy your configurations FROM YOUR REMOTE MACHINE TO THIS RPI:"
 echo ""
 echo "On your remote machine run:"
-echo "  scp -r /etc/dunebugger pi@<RPi_IP>:/etc"
-echo "  scp -r /etc/dunebugger-remote pi@<RPi_IP>:/etc"
+echo "  scp -r /opt/dunebugger-data pi@<RPi_IP>:/opt"
+echo "  scp -r /opt/dunebugger-remote pi@<RPi_IP>:/opt"
+echo "  scp -r /opt/dunebugger-scheduler pi@<RPi_IP>:/opt"
 echo ""
 echo "Press ENTER once copying is complete..."
 read
@@ -92,7 +94,7 @@ sudo ./install.sh
 
 echo ""
 echo "=== Stage 2 completed ==="
-echo "Next step: Docker Remote + NATS."
+echo "Next step: Install container: Remote + Scheduler + NATS."
 echo "Run:"
-echo "    bash stage3_remote_and_nats.sh"
+echo "    bash stage3_containers.sh"
 echo ""
