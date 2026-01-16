@@ -17,12 +17,26 @@ echo "[INFO] Creating Dunebugger directories..."
 sudo mkdir -p /opt/dunebugger-data/music/easteregg
 sudo mkdir -p /opt/dunebugger-data/music/onair
 sudo mkdir -p /opt/dunebugger-data/sequences/onair
+sudo mkdir -p /opt/dunebugger-data/modes
 sudo mkdir -p /opt/dunebugger-data/sfx
 sudo chown -R pi:pi /opt/dunebugger-data
 sudo mkdir -p /opt/dunebugger-remote/config
 sudo chown -R pi:pi /opt/dunebugger-remote
 sudo mkdir -p /opt/dunebugger-scheduler/config
 sudo chown -R pi:pi /opt/dunebugger-scheduler
+
+###############################################
+# Create NATS configuration
+###############################################
+echo "[INFO] Creating NATS configuration..."
+
+sudo mkdir -p /opt/nats
+sudo tee /opt/nats/nats.conf > /dev/null <<'EOF'
+listen: 0.0.0.0:4222
+http: 0.0.0.0:8222
+EOF
+
+sudo chown -R pi:pi /opt/nats
 
 echo ""
 echo "=== MANUAL STEP REQUIRED ==="

@@ -1,6 +1,6 @@
 services:
-  dunebugger-remote:
-    image: marcosvitol/dunebugger-remote:latest
+  remote:
+    image: ghcr.io/marco-svitol/dunebugger-remote:<DUNEBUGGER_REMOTE_VERSION_HERE>
     container_name: dunebugger-remote
     restart: unless-stopped
     network_mode: host  # Use host networking to access Raspberry Pi interfaces
@@ -10,7 +10,8 @@ services:
       - PYTHONPATH=/app
     volumes:
       # Mount config directory for easy configuration updates
-      - /opt/dunebugger-remote/config:/app/app/config:rw
+      - /opt/dunebugger/remote/config:/app/app/config:rw
+      - /opt/dunebugger/docker-compose.yml:/opt/dunebugger/docker-compose.yml:ro
       # Mount host proc and sys for network information
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -20,8 +21,8 @@ services:
     depends_on:
       - nats-server
 
-  dunebugger-scheduler:
-    image: marcosvitol/dunebugger-scheduler:latest
+  scheduler:
+    image: ghcr.io/marco-svitol/dunebugger-scheduler:<DUNEBUGGER_SCHEDULER_VERSION_HERE>
     container_name: dunebugger-scheduler
     restart: unless-stopped
     network_mode: host  # Use host networking to access Raspberry Pi interfaces
@@ -29,7 +30,7 @@ services:
       - PYTHONPATH=/app
     volumes:
       # Mount config directory for easy configuration updates
-      - /opt/dunebugger-scheduler/config:/app/app/config:rw
+      - /opt/dunebugger/scheduler/config:/app/app/config:rw
       # Mount host proc and sys for network information
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -47,4 +48,6 @@ services:
     network_mode: host  # Use host networking to match dunebugger-remote
     # Note: ports are not needed with host networking - they're directly exposed
     # NATS server command with monitoring and debug/verbose flags
+    volumes:
+      - /opt/nats/nats.conf:/etc/nats/nats.conf:ro
     command: ["-m", "8222", "-DV"]
