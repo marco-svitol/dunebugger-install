@@ -1,0 +1,32 @@
+[Unit]
+Description=DuneBugger Update Coordinator
+Documentation=https://github.com/marco-svitol/dunebugger-remote
+After=network.target docker.service
+Wants=docker.service
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/opt/dunebugger
+ExecStart=/usr/bin/python3 /opt/dunebugger/update-coordinator/update-coordinator.py
+Restart=on-failure
+RestartSec=10s
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=dunebugger-coordinator
+
+# Security settings
+PrivateTmp=yes
+NoNewPrivileges=false
+ProtectSystem=full
+ProtectHome=yes
+
+# Resource limits
+CPUQuota=20%
+MemoryLimit=256M
+
+[Install]
+WantedBy=multi-user.target

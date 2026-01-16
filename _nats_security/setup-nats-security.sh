@@ -7,22 +7,21 @@ set -e
 echo "Setting up NATS security configuration..."
 
 # Create NATS config directory
-sudo mkdir -p /opt/dunebugger-remote/config/nats
+sudo mkdir -p /opt/dunebugger/remote/config/nats
 
 # Copy the configuration file
-sudo cp nats-secure.conf /opt/dunebugger-remote/config/nats/nats.conf
+sudo cp nats-secure.conf /opt/dunebugger/remote/config/nats/nats.conf
 
 # Generate a secure random token
 SECURE_TOKEN=$(openssl rand -hex 32)
 echo "Generated secure token: $SECURE_TOKEN"
 
 # Replace the default token with the generated one
-sudo sed -i "s/dunebugger_secure_token_change_me_123456789/$SECURE_TOKEN/g" /opt/dunebugger-remote/config/nats/nats.conf
+sudo sed -i "s/dunebugger_secure_token_change_me_123456789/$SECURE_TOKEN/g" /opt/dunebugger/remote/config/nats/nats.conf
 
 # Set proper permissions
-sudo chown -R 1000:1000 /opt/dunebugger-remote/config/nats/
-sudo chmod 644 /opt/dunebugger-remote/config/nats/nats.conf
-
+sudo chown -R 1000:1000 /opt/dunebugger/remote/config/nats/
+sudo chmod 644 /opt/dunebugger/remote/config/nats/nats.conf
 echo "NATS security configuration completed!"
 echo ""
 echo "IMPORTANT: Save this token for your applications:"

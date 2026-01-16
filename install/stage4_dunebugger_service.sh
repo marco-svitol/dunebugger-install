@@ -18,8 +18,8 @@ After=network.target
 [Service]
 Type=simple
 User=pi
-WorkingDirectory=/opt/dunebugger
-ExecStart=/opt/dunebugger/.venv/bin/python /opt/dunebugger/app/main.py
+WorkingDirectory=/opt/dunebugger/core
+ExecStart=/opt/dunebugger/core/.venv/bin/python /opt/dunebugger/core/app/main.py
 Restart=always
 RestartSec=5
 Environment="PYTHONUNBUFFERED=1"
@@ -52,7 +52,7 @@ if ! grep -q "alias dbt=" ~/.bashrc; then
   cat >> ~/.bashrc <<'EOF'
 
 # Dunebugger aliases
-alias dbt='/opt/dunebugger-terminal/.venv/bin/python /opt/dunebugger-terminal/app/main.py'
+alias dbt='/opt/dunebugger/terminal/.venv/bin/python /opt/dunebugger/terminal/app/main.py'
 alias dbj='journalctl -u dunebugger.service -f'
 alias dbst='sudo systemctl status dunebugger.service'
 EOF

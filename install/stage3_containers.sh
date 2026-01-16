@@ -35,30 +35,8 @@ fi
 # Create docker-compose.yaml template
 ###############################################
 if [[ ! -f ~/docker-compose.yaml ]]; then
-  echo "[INFO] Creating docker-compose.yaml template..."
-
-  cat > ~/docker-compose.yaml <<'EOF'
-version: '3.8'
-services:
-  dunebugger-remote:
-    image: ilciclaio/dunebugger-remote:latest
-    ...
-    depends_on:
-      - nats-server
-
-  dunebugger-scheduler:
-    image: ilciclaio/dunebugger-scheduler:latest
-    ...
-    depends_on:
-      - dunebugger-remote
-
-  nats-server:
-    image: nats:latest
-    ...
-EOF
-
   echo "[ACTION REQUIRED]"
-  echo "Review ~/docker-compose.yaml and modify if needed."
+  echo "Provide docker-compose.yaml file."
   echo "Press ENTER when done..."
   read
 fi

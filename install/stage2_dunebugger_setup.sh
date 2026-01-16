@@ -10,20 +10,25 @@ if [[ $EUID -eq 0 ]]; then
 fi
 
 ###############################################
-# Create config directories
+# Create components, config and data directories
 ###############################################
 echo "[INFO] Creating Dunebugger directories..."
 
-sudo mkdir -p /opt/dunebugger-data/music/easteregg
-sudo mkdir -p /opt/dunebugger-data/music/onair
-sudo mkdir -p /opt/dunebugger-data/sequences/onair
-sudo mkdir -p /opt/dunebugger-data/modes
-sudo mkdir -p /opt/dunebugger-data/sfx
-sudo chown -R pi:pi /opt/dunebugger-data
-sudo mkdir -p /opt/dunebugger-remote/config
-sudo chown -R pi:pi /opt/dunebugger-remote
-sudo mkdir -p /opt/dunebugger-scheduler/config
-sudo chown -R pi:pi /opt/dunebugger-scheduler
+sudo mkdir -p /opt/dunebugger
+
+sudo mkdir -p /opt/dunebugger/core
+sudo mkdir -p /opt/dunebugger/terminal
+sudo mkdir -p /opt/dunebugger/axpop-captive-portal
+
+sudo mkdir -p /opt/dunebugger/data/core/music/easteregg
+sudo mkdir -p /opt/dunebugger/data/core/music/onair
+sudo mkdir -p /opt/dunebugger/data/core/sequences/onair
+sudo mkdir -p /opt/dunebugger/data/core/modes
+sudo mkdir -p /opt/dunebugger/data/core/sfx
+sudo mkdir -p /opt/dunebugger/config/remote/
+sudo mkdir -p /opt/dunebugger/config/scheduler/
+
+sudo chown -R pi:pi /opt/dunebugger
 
 ###############################################
 # Create NATS configuration
@@ -31,43 +36,33 @@ sudo chown -R pi:pi /opt/dunebugger-scheduler
 echo "[INFO] Creating NATS configuration..."
 
 sudo mkdir -p /opt/nats
+sudo chown -R pi:pi /opt/nats
 sudo tee /opt/nats/nats.conf > /dev/null <<'EOF'
 listen: 0.0.0.0:4222
 http: 0.0.0.0:8222
 EOF
-
-sudo chown -R pi:pi /opt/nats
 
 echo ""
 echo "=== MANUAL STEP REQUIRED ==="
 echo "Please copy your configurations FROM YOUR REMOTE MACHINE TO THIS RPI:"
 echo ""
 echo "On your remote machine run:"
-echo "  scp -r /opt/dunebugger-data pi@<RPi_IP>:/opt"
-echo "  scp -r /opt/dunebugger-remote pi@<RPi_IP>:/opt"
-echo "  scp -r /opt/dunebugger-scheduler pi@<RPi_IP>:/opt"
+echo "  scp -r /opt/dunebugger/data pi@<RPi_IP>:/opt/dunebugger/data"
+echo "  scp -r /opt/dunebugger/config pi@<RPi_IP>:/opt/dunebugger/config"
 echo ""
 echo "Press ENTER once copying is complete..."
 read
-
-###############################################
-# Folder creation for code
-###############################################
-echo "[INFO] Creating /opt folders..."
-
-sudo mkdir -p /opt/dunebugger
-sudo mkdir -p /opt/dunebugger-terminal
-sudo mkdir -p /opt/axpop-captive-portal
-sudo chown -R pi:pi /opt
 
 ###############################################
 # Clone repos over SSH
 ###############################################
 echo "[INFO] Cloning Git repositories..."
 
-cd /opt
+cd /opt/dunebugger/core
 git clone git@github.com:marco-svitol/dunebugger.git
+cd /opt/dunebugger/terminal
 git clone git@github.com:marco-svitol/dunebugger-terminal.git
+cd /opt/dunebugger/axpop-captive-portal
 git clone git@github.com:marco-svitol/axpop-captive-portal.git
 
 ###############################################
@@ -81,19 +76,19 @@ sudo apt install -y swig python3-dev liblgpio-dev python3-venv
 ###############################################
 echo "[INFO] Creating Python venvs and installing requirements..."
 
-cd /opt/dunebugger
+cd /opt/dunebugger/core
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 deactivate
 
-cd /opt/dunebugger-terminal
+cd /opt/dunebugger/terminal
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 deactivate
 
-cd /opt/axpop-captive-portal
+cd /opt/dunebugger/axpop-captive-portal
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -103,7 +98,7 @@ deactivate
 # Install captive portal
 ###############################################
 echo "[INFO] Installing captive portal..."
-cd /opt/axpop-captive-portal
+cd /opt/dunebugger/axpop-captive-portal
 sudo ./install.sh
 
 echo ""
