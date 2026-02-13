@@ -35,12 +35,20 @@ echo "✓ Service stopped"
 # Remove current installation
 echo "Removing current installation..."
 rm -rf "${INSTALL_DIR:?}"/*
+rm -rf "${INSTALL_DIR:?}"/.venv
 echo "✓ Current installation removed"
 
 # Restore backup
 echo "Restoring backup..."
 tar -xzf "$LATEST_BACKUP" -C "$INSTALL_DIR"
 echo "✓ Backup restored"
+
+# Creating venv and activating it
+echo "Setting up virtual environment..."
+python3 -m venv "${INSTALL_DIR}/.venv"
+# shellcheck disable=SC1091
+source "${INSTALL_DIR}/.venv/bin/activate"
+echo "✓ Virtual environment set up"
 
 # Install dependencies (in case they changed)
 echo "Installing dependencies..."

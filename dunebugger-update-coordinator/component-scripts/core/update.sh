@@ -34,6 +34,7 @@ mkdir -p "$BACKUP_DIR"
 mkdir -p "$TEMP_DIR"
 
 # Download release artifact
+echo "PHASE:downloading"
 echo "Downloading release artifact..."
 DOWNLOAD_URL="https://github.com/${GITHUB_REPO}/releases/download/v${VERSION}/dunebugger-${VERSION}.tar.gz"
 wget -O "${TEMP_DIR}/dunebugger-${VERSION}.tar.gz" "$DOWNLOAD_URL"
@@ -47,11 +48,16 @@ fi
 echo "✓ Artifact downloaded"
 
 # Create backup of current installation
+echo "PHASE:backing_up"
 echo "Creating backup..."
 tar -czf "${BACKUP_DIR}/core.${TIMESTAMP}.tar.gz" -C "$INSTALL_DIR" .
 echo "✓ Backup created: ${BACKUP_DIR}/core.${TIMESTAMP}.tar.gz"
 
+# Rotate backups - keep only the 3 most recent
+ls -t "${BACKUP_DIR}"/core.*.tar.gz 2>/dev/null | tail -n +4 | xargs -r rm -f
+
 # Stop service
+echo "PHASE:installing"
 echo "Stopping service..."
 systemctl stop dunebugger || true
 echo "✓ Service stopped"
@@ -59,12 +65,20 @@ echo "✓ Service stopped"
 # Remove old installation
 echo "Removing old installation..."
 rm -rf "${INSTALL_DIR:?}"/*
+rm -rf "${INSTALL_DIR:?}"/.venv
 echo "✓ Old installation removed"
 
 # Extract new version
 echo "Extracting new version..."
 tar -xzf "${TEMP_DIR}/dunebugger-${VERSION}.tar.gz" -C "$INSTALL_DIR"
 echo "✓ New version extracted"
+
+# Creating venv and activating it
+echo "Setting up virtual environment..."
+python3 -m venv "${INSTALL_DIR}/.venv"
+# shellcheck disable=SC1091
+source "${INSTALL_DIR}/.venv/bin/activate"
+echo "✓ Virtual environment set up"
 
 # Install dependencies
 echo "Installing dependencies..."
@@ -77,6 +91,7 @@ systemctl start dunebugger
 echo "✓ Service started"
 
 # Wait for service to stabilize
+echo "PHASE:verifying"
 echo "Waiting for service to stabilize..."
 sleep 5
 

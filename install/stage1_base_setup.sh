@@ -19,8 +19,8 @@ sudo apt upgrade -y
 ###############################################
 # Basic utilities
 ###############################################
-echo "[INFO] Installing base tools (tmux, vim)..."
-sudo apt install -y tmux vim
+echo "[INFO] Installing base tools (tmux, vim, inotify-tools, jq)..."
+sudo apt install -y tmux vim inotify-tools jq
 
 ###############################################
 # Configure VIM

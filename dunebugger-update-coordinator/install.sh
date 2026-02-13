@@ -42,16 +42,26 @@ echo "DuneBugger Update Coordinator Installation"
 echo "=========================================="
 echo ""
 
-# Check dependencies
+# Check and install dependencies
 echo -e "${YELLOW}Checking dependencies...${NC}"
-if ! command -v python3 &> /dev/null; then
-    echo -e "${RED}Error: python3 is not installed${NC}"
-    exit 1
+
+if ! command -v inotifywait &> /dev/null; then
+    echo -e "${YELLOW}Installing inotify-tools...${NC}"
+    apt-get install -y inotify-tools
 fi
 
-if ! python3 -c "import watchdog" 2>/dev/null; then
-    echo -e "${YELLOW}Installing Python watchdog library...${NC}"
-    pip3 install watchdog
+if ! command -v jq &> /dev/null; then
+    echo -e "${YELLOW}Installing jq...${NC}"
+    apt-get install -y jq
+fi
+
+# Install yq for safe YAML editing (Go binary, ARM-compatible)
+if ! command -v yq &> /dev/null; then
+    echo -e "${YELLOW}Installing yq...${NC}"
+    YQ_ARCH=$(dpkg --print-architecture)
+    YQ_VERSION="v4.44.6"
+    wget -qO /usr/local/bin/yq "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${YQ_ARCH}"
+    chmod +x /usr/local/bin/yq
 fi
 
 echo -e "${GREEN}✓ Dependencies OK${NC}"
@@ -79,9 +89,17 @@ echo ""
 
 # Copy coordinator script
 echo -e "${YELLOW}Installing coordinator script...${NC}"
-cp update-coordinator.py "$INSTALL_DIR/"
-chmod +x "$INSTALL_DIR/update-coordinator.py"
+cp update-coordinator.sh "$INSTALL_DIR/"
+chmod +x "$INSTALL_DIR/update-coordinator.sh"
 echo -e "${GREEN}✓ Coordinator script installed${NC}"
+
+# Copy component scripts
+echo -e "${YELLOW}Installing component scripts...${NC}"
+cp -r component-scripts/ "$INSTALL_DIR/"
+chmod +x "$INSTALL_DIR"/component-scripts/*/update.sh
+chmod +x "$INSTALL_DIR"/component-scripts/*/rollback.sh
+chmod +x "$INSTALL_DIR"/component-scripts/*/health-check.sh
+echo -e "${GREEN}✓ Component scripts installed${NC}"
 echo ""
 
 # Install systemd service

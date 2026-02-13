@@ -32,26 +32,34 @@ echo "=========================================="
 mkdir -p "$BACKUP_DIR"
 
 # Backup current docker-compose.yml
+echo "PHASE:backing_up"
 echo "Creating backup..."
 cp "$COMPOSE_FILE" "${BACKUP_DIR}/docker-compose.${TIMESTAMP}.yml"
 echo "✓ Backup created: ${BACKUP_DIR}/docker-compose.${TIMESTAMP}.yml"
 
-# Update image tag in docker-compose.yml
+# Rotate backups - keep only the 3 most recent
+ls -t "${BACKUP_DIR}"/docker-compose.*.yml 2>/dev/null | tail -n +4 | xargs -r rm -f
+
+# Update image tag in docker-compose.yml using yq
+echo "PHASE:updating_config"
 echo "Updating docker-compose.yml..."
-sed -i "s|image: ghcr.io/marco-svitol/dunebugger-remote:.*|image: ghcr.io/marco-svitol/dunebugger-remote:${VERSION}|g" "$COMPOSE_FILE"
+yq -i ".services.remote.image = \"ghcr.io/marco-svitol/dunebugger-remote:${VERSION}\"" "$COMPOSE_FILE"
 echo "✓ Image tag updated to ${VERSION}"
 
 # Pull new image
+echo "PHASE:downloading"
 echo "Pulling new image..."
-docker-compose -f "$COMPOSE_FILE" pull remote
+docker compose -f "$COMPOSE_FILE" pull remote
 echo "✓ Image pulled"
 
 # Restart container
+echo "PHASE:installing"
 echo "Restarting container..."
-docker-compose -f "$COMPOSE_FILE" up -d --no-deps remote
+docker compose -f "$COMPOSE_FILE" up -d --no-deps remote
 echo "✓ Container restarted"
 
 # Wait for container to be healthy
+echo "PHASE:verifying"
 echo "Waiting for container to be healthy..."
 sleep 5
 
@@ -65,6 +73,6 @@ else
     echo "✗ Container is not running"
     echo "Rolling back..."
     cp "${BACKUP_DIR}/docker-compose.${TIMESTAMP}.yml" "$COMPOSE_FILE"
-    docker-compose -f "$COMPOSE_FILE" up -d --no-deps remote
+    docker compose -f "$COMPOSE_FILE" up -d --no-deps remote
     exit 1
 fi

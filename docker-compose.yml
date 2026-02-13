@@ -12,6 +12,8 @@ services:
       # Mount config directory for easy configuration updates
       - /opt/dunebugger/remote/config:/app/app/config:rw
       - /opt/dunebugger/docker-compose.yml:/opt/dunebugger/docker-compose.yml:ro
+      # Shared volume for update coordinator communication
+      - /var/dunebugger/updates:/var/dunebugger/updates
       # Mount host proc and sys for network information
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -42,7 +44,7 @@ services:
 
   # NATS server for message queue (based on your config)
   nats-server:
-    image: nats:latest
+    image: nats:2.10-alpine
     container_name: nats-server
     restart: unless-stopped
     network_mode: host  # Use host networking to match dunebugger-remote

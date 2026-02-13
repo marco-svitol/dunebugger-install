@@ -103,7 +103,7 @@ Each component must provide standard scripts in its directory:
 ### Script Locations
 
 ```
-/opt/dunebugger/
+/opt/dunebugger/update-coordinator/component-scripts/
 ├── core/
 │   ├── update.sh
 │   ├── rollback.sh

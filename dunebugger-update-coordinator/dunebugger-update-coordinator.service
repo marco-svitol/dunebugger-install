@@ -9,7 +9,7 @@ Type=simple
 User=root
 Group=root
 WorkingDirectory=/opt/dunebugger
-ExecStart=/usr/bin/python3 /opt/dunebugger/update-coordinator/update-coordinator.py
+ExecStart=/bin/bash /opt/dunebugger/update-coordinator/update-coordinator.sh
 Restart=on-failure
 RestartSec=10s
 

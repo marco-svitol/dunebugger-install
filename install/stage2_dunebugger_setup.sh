@@ -28,7 +28,16 @@ sudo mkdir -p /opt/dunebugger/data/core/sfx
 sudo mkdir -p /opt/dunebugger/config/remote/
 sudo mkdir -p /opt/dunebugger/config/scheduler/
 
+sudo mkdir -p /opt/dunebugger/backups/
+sudo mkdir -p /opt/dunebugger/update-coordinator/
+
 sudo chown -R pi:pi /opt/dunebugger
+
+sudo mkdir -p /var/log/dunebugger
+sudo chown -R pi:pi /var/log/dunebugger
+
+sudo mkdir -p /var/dunebugger/
+sudo chown -R pi:pi /var/dunebugger/
 
 ###############################################
 # Create NATS configuration
@@ -100,6 +109,53 @@ deactivate
 echo "[INFO] Installing captive portal..."
 cd /opt/dunebugger/axpop-captive-portal
 sudo ./install.sh
+
+###############################################
+# Install update coordinator
+###############################################
+echo "[INFO] Installing update coordinator..."
+
+UPDATE_COORD_DIR="/opt/dunebugger/update-coordinator"
+sudo mkdir -p "$UPDATE_COORD_DIR"
+sudo mkdir -p /var/dunebugger/updates/requests
+sudo mkdir -p /var/dunebugger/updates/status
+
+# Copy coordinator script and component scripts
+# These are sourced from the dunebugger-install repo
+INSTALL_REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+COORDINATOR_SRC="${INSTALL_REPO_DIR}/../dunebugger-update-coordinator"
+
+if [[ -d "$COORDINATOR_SRC" ]]; then
+    sudo cp "$COORDINATOR_SRC/update-coordinator.sh" "$UPDATE_COORD_DIR/"
+    sudo chmod +x "$UPDATE_COORD_DIR/update-coordinator.sh"
+    sudo cp -r "$COORDINATOR_SRC/component-scripts" "$UPDATE_COORD_DIR/"
+    sudo chmod +x "$UPDATE_COORD_DIR"/component-scripts/*/update.sh
+    sudo chmod +x "$UPDATE_COORD_DIR"/component-scripts/*/rollback.sh
+    sudo chmod +x "$UPDATE_COORD_DIR"/component-scripts/*/health-check.sh
+    echo "[INFO] Update coordinator scripts installed"
+else
+    echo "[WARN] Update coordinator source not found at $COORDINATOR_SRC"
+    echo "       You can install it manually later using the coordinator install.sh script."
+fi
+
+# Install yq for safe YAML editing (used by update scripts)
+if ! command -v yq &> /dev/null; then
+    echo "[INFO] Installing yq..."
+    YQ_ARCH=$(dpkg --print-architecture)
+    YQ_VERSION="v4.44.6"
+    sudo wget -qO /usr/local/bin/yq "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${YQ_ARCH}"
+    sudo chmod +x /usr/local/bin/yq
+fi
+
+# Install systemd service for update coordinator
+if [[ -f "$COORDINATOR_SRC/dunebugger-update-coordinator.service" ]]; then
+    sudo cp "$COORDINATOR_SRC/dunebugger-update-coordinator.service" /etc/systemd/system/
+    sudo systemctl daemon-reload
+    sudo systemctl enable dunebugger-update-coordinator
+    echo "[INFO] Update coordinator systemd service enabled"
+fi
+
+sudo chown -R pi:pi /var/dunebugger/
 
 echo ""
 echo "=== Stage 2 completed ==="
